@@ -6,6 +6,8 @@ import * as kyberswap from './adapters/kyberswap';
 import * as openocean from './adapters/openocean';
 import * as paraswap from './adapters/paraswap';
 import * as lifi from './adapters/lifi';
+import * as gmx from './adapters/openocean';
+import * as gns from './adapters/paraswap';
 // import * as rango from './adapters/rango';
 
 // import * as unidex from "./adapters/unidex" - disabled, their api is broken
@@ -17,7 +19,7 @@ import { allChains } from '../WalletProvider/chains';
 import { chainNamesReplaced, chainsMap } from './constants';
 // import * as krystal from './adapters/krystal'
 
-export const adapters = [matcha, inch, cowswap, kyberswap, openocean, yieldyak, paraswap, firebird];
+export const adapters = [gmx, gns];
 
 export const inifiniteApprovalAllowed = [matcha.name, inch.name, cowswap.name, kyberswap.name, paraswap.name];
 

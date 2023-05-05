@@ -13,6 +13,7 @@ import { useQueryClient } from '@tanstack/react-query';
 import Image from 'next/image';
 import coingecko from '~/public/coingecko.svg';
 import { allChains } from '../WalletProvider/chains';
+import { initialTokens } from '~/components/Aggregator/constants';
 
 const Row = ({ chain, token, onClick }) => {
 	const blockExplorer = allChains.find((c) => c.id == chain.id)?.blockExplorers?.default;
@@ -282,7 +283,7 @@ const TokenSelect = ({ tokens, onClick, token, selectedChain }) => {
 				<SelectModal
 					isOpen={isOpen}
 					onClose={onClose}
-					data={tokens}
+					data={initialTokens}
 					onClick={onTokenClick}
 					selectedChain={selectedChain}
 				/>

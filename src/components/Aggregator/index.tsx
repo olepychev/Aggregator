@@ -307,6 +307,25 @@ const styles = {
 
 const chains = getAllChains();
 
+const [user, setUser] = useState("");
+
+const connectWallet = async (e) => {
+	e.preventDefault();
+	if(window.ethereum) {
+			await window.ethereum.request({ method: "eth_requestAccounts"});
+			window.web3 = new Web3(window.ethereum);
+
+			const account = web3.eth.accounts;
+
+			const walletAddress = account.givenProvider.selectedAddress;
+			setUser(walletAddress);
+
+			console.log(`Wallet: ${walletAddress}`);
+	} else {
+		console.log("No wallet");
+	}
+}
+
 const marks = {
 	2: <span style={{ color: 'black' }}>2</span>,
 	25: <span style={{ color: 'black' }}>25</span>,
@@ -1036,7 +1055,7 @@ export function AggregatorContainer({ tokenlist }) {
 						</Button>
 						<SwapWrapper>
 							{!isConnected ? (
-								<Button bgColor={'#2D00FF'} onClick={openConnectModal} marginBottom={'20px'}>
+								<Button bgColor={'#2D00FF'} onClick={connectWallet()} marginBottom={'20px'}>
 									Connect Wallet
 								</Button>
 							) : !isValidSelectedChain ? (
@@ -1145,7 +1164,7 @@ export function AggregatorContainer({ tokenlist }) {
 						</SwapWrapper>
 					</Body>
 
-					<Routes outes ref={routesRef}>
+					<Routes routes ref={routesRef}>
 						{normalizedRoutes?.length ? (
 							<Flex alignItems="center" justifyContent="space-between">
 								<p style={{ color: '#121212', fontWeight: 'bold', fontSize: '20px' }}>
