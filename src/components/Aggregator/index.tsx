@@ -8,8 +8,8 @@ import BigNumber from 'bignumber.js';
 import { ArrowRight } from 'react-feather';
 import styled from 'styled-components';
 import Select from "react-select"
-
 import Web3 from 'web3';
+
 
 import {
 	Heading,
@@ -1055,7 +1055,7 @@ export function AggregatorContainer({ tokenlist }) {
 							Calculate
 						</Button>
 						<SwapWrapper>
-							{!isConnected ? (
+							{!ethereumAccount ? (
 								<Button bgColor={'#2D00FF'} onClick={connectMetamaskWallet} marginBottom={'20px'}>
 									Connect Wallet
 								</Button>
@@ -1230,7 +1230,7 @@ export function AggregatorContainer({ tokenlist }) {
 
 								{aggregator === r.name && (
 									<SwapUnderRoute>
-										{!isConnected ? (
+										{!ethereumAccount ? (
 											<ConnectButtonWrapper>
 												<ConnectButton />
 											</ConnectButtonWrapper>

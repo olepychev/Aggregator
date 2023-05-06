@@ -52,12 +52,12 @@ const assetPairAddress = [
 
  const useReadDataFromContract = async () => {
         if (window.ethereum) {
-          const web3 = new Web3((window as any).ethereum);
-          const contract = new web3.eth.Contract(GNSAbi, assetPairAddress[0].contractAddress);
+          // const web3 = new Web3((window as any).ethereum);
+          // const contract = new web3.eth.Contract(GNSAbi, assetPairAddress[0].contractAddress);
           // Change accounts[0] to the desired address from which you want to call the read-only function
-          const accounts = await web3.eth.getAccounts();
-          const result = await contract.methods.getData().call({ from: accounts[0] });
-          return JSON.parse(result);
+          // const accounts = await web3.eth.getAccounts();
+          // const result = await contract.methods.getData().call({ from: accounts[0] });
+          // return JSON.parse(result);
 		}
   };
 
