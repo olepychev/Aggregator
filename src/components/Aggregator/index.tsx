@@ -852,7 +852,7 @@ export function AggregatorContainer({ tokenlist }) {
 			});
 		}
 	};
-	console.log(finalSelectedFromToken);
+	// console.log(finalSelectedFromToken);
 	return (
 		<div style={{ marginTop: '100px' }}>
 			<Wrapper>
@@ -1235,7 +1235,7 @@ export function AggregatorContainer({ tokenlist }) {
 												<ConnectButton />
 											</ConnectButtonWrapper>
 										) : !isValidSelectedChain ? (
-											<Button colorScheme={'messenger'} onClick={() => switchNetwork(selectedChain.id)}>
+											<Button colorScheme={'messenger'} onClick={() => switchNetwork?.(selectedChain.id)}>
 												Switch Network
 											</Button>
 										) : (
