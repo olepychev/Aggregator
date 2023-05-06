@@ -1,0 +1,89 @@
+@import '../../css/variables.scss';
+
+.button {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 12px;
+  font-weight: 700;
+  box-sizing: border-box;
+  background: $blue-600;
+  color: $white;
+  &:hover {
+    background: $blue-700;
+  }
+
+  svg {
+    font-size: 10px;
+  }
+}
+.fullWidth {
+  width: 100%;
+}
+.iconLeft {
+  svg {
+    margin: 0 0 0 8px;
+  }
+}
+
+.iconRight {
+  svg {
+    margin: 0 8px 0 0;
+  }
+}
+
+.buttonWarning {
+  @extend .button;
+  background: $red-600;
+  color: $white;
+  &:hover {
+    background: $red-800;
+  }
+}
+
+.buttonSecondary {
+  @extend .button;
+  background: $gray-700;
+  color: #C4C4C4;
+  &:hover {
+    background: $gray-600;
+  }
+}
+
+.buttonTertiary {
+  @extend .button;
+  border: 1px solid $gray-700;
+  border-radius: 10px;
+  background: $midnight-500;
+  color: $white;
+  &:hover {
+    background: $midnight-400;
+  }
+}
+
+.buttonPurple {
+  @extend .button;
+  background: $purple-500;
+  color: $white;
+  &:hover {
+    background: $purple-400;
+  }
+}
+
+.buttonSteel {
+  @extend .button;
+  background: $steel-500;
+  color: $white;
+  &:hover {
+    background: $steel-400;
+  }
+}
+
+.inactive {
+  pointer-events: none;
+}
+
+.link {
+  text-decoration: none;
+  color: inherit;
+}

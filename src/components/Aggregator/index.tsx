@@ -9,7 +9,7 @@ import { ArrowRight } from 'react-feather';
 import styled from 'styled-components';
 import Select from "react-select"
 import Web3 from 'web3';
-
+import Connect from '../Connect/ConnectButton';
 
 import {
 	Heading,
@@ -111,6 +111,42 @@ cant integrate:
 - wardenswap - no api + sdk is closed source
 - https://twitter.com/DexibleApp - not an aggregator, only supports exotic orders like TWAP, segmented order, stop loss...
 */
+
+
+import readFromContract from './getGNSprice';
+import path from 'path';
+import {fs} from 'fs';
+// const path = require("path");
+// const readFromContract = require('./getGNSprice');
+// const fs = import ("fs");
+
+const abiPath = path.resolve("contractABI/GNSPrice.json");  
+const rawData = fs.readFileSync(abiPath);  
+const contractAbi = JSON.parse(rawData);
+
+
+const assetPairAddress = [
+   {
+     contractAddress: '0xc907E116054Ad103354f2D350FD2514433D57F6f',  
+     asset: 'BTC/USD'
+   },
+   {
+    contractAddress: '0xF9680D99D6C9589e2a93a78A04A279e509205945',
+    asset: 'ETH/USD'
+  },
+  {
+    contractAddress: '0xF9680D99D6C9589e2a93a78A04A279e509205945',
+    asset: 'LINK/USD'
+  },
+  {
+    contractAddress: '0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C',
+    asset: 'UNI/USD'
+  }
+]
+
+const dummyABI = contractAbi;
+
+
 
 const Body = styled.div<{ showRoutes: boolean }>`
 	display: flex;
@@ -361,6 +397,12 @@ export function AggregatorContainer({ tokenlist }) {
 	const isValidSelectedChain = selectedChain && chainOnWallet ? selectedChain.id === chainOnWallet.id : false;
 
 
+	const [selectedToken, setSelectedToken] = useState(null);
+
+	useEffect(() => {
+		console.log(selectedToken);
+	}, [selectedToken])
+
 	async function connectMetamaskWallet(): Promise<void> {
 		//to get around type checking
 		(window as any).ethereum
@@ -607,9 +649,12 @@ export function AggregatorContainer({ tokenlist }) {
 	};
 	const onFromTokenChange = (token) => {
 		setAggregator(null);
-		router.push({ pathname: router.pathname, query: { ...router.query, from: token.address } }, undefined, {
-			shallow: true
-		});
+	
+
+		// router.push({ pathname: router.pathname, query: { ...router.query, from: token.address } }, undefined, {
+		// 	shallow: true
+		// });
+
 	};
 	const onToTokenChange = (token) => () => {
 		setAggregator(null);
@@ -852,6 +897,7 @@ export function AggregatorContainer({ tokenlist }) {
 			});
 		}
 	};
+
 	// console.log(finalSelectedFromToken);
 	return (
 		<div style={{ marginTop: '100px' }}>
@@ -889,7 +935,7 @@ export function AggregatorContainer({ tokenlist }) {
 							<TokenSelect
 								tokens={tokensInChain.filter(({ address }) => address !== finalSelectedToToken?.address)}
 								token={finalSelectedFromToken}
-								onClick={onFromTokenChange}
+								onClick={(token) => setSelectedToken(token)}
 								selectedChain={selectedChain}
 							/>
 
@@ -1051,16 +1097,18 @@ export function AggregatorContainer({ tokenlist }) {
 				</Alert>
 			</>
 		) : null} */}
-						<Button bgColor={'#381CB8'} onClick={onToTokenChange(finalSelectedFromToken)}>
+						{/* <Button bgColor={'#381CB8'} onClick={onToTokenChange(finalSelectedFromToken)}>
 							Calculate
-						</Button>
-						<SwapWrapper>
+						</Button> */}
+
+						<Connect></Connect>
+						{/* <SwapWrapper>
 							{!ethereumAccount ? (
 								<Button bgColor={'#2D00FF'} onClick={connectMetamaskWallet} marginBottom={'20px'}>
 									Connect Wallet
 								</Button>
 							) : !isValidSelectedChain ? (
-								<Button bgColor={'#2D00FF'} onClick={() => switchNetwork(selectedChain.id)}>
+								<Button bgColor={'#2D00FF'} onClick={() => switchNetwork?.(selectedChain.id)}>
 									Switch Network
 								</Button>
 							) : insufficientBalance ? (
@@ -1162,7 +1210,7 @@ export function AggregatorContainer({ tokenlist }) {
 									)}
 								</>
 							)}
-						</SwapWrapper>
+						</SwapWrapper> */}
 					</Body>
 
 					<Routes routes ref={routesRef}>

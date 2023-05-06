@@ -117,6 +117,7 @@ const Row = ({ data, onClick }) => {
 };
 
 const Modal = ({ close, onInputChange, data, onClick }) => {
+
 	return (
 		<ModalOverlay>
 			<ModalWrapper>
