@@ -140,7 +140,7 @@ export const PRICE_IMPACT_WARNING_THRESHOLD = 7;
 
 
 export const initialTokens = [{
-  "name": "ChainLink Token",
+  "name": "LINK/USD",
   "address": "0x514910771af9ca656af840dff83e8264ecf986ca",
   "symbol": "LINK",
   "decimals": 18,
@@ -162,13 +162,13 @@ export const initialTokens = [{
           }
       }
   },
-  "label": "LINK",
+  "label": "LINK/USD",
   "value": "0x514910771af9ca656af840dff83e8264ecf986ca",
   "geckoId": null,
   "volume24h": 0
 },
 {
-  "name": "Uniswap",
+  "name": "UNI/USD",
   "address": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
   "symbol": "UNI",
   "decimals": 18,
@@ -190,14 +190,14 @@ export const initialTokens = [{
           }
       }
   },
-  "label": "UNI",
+  "label": "UNI/USD",
   "value": "0x1f9840a85d5af5bf1d1762f925bdaddc4201f984",
   "geckoId": null,
   "volume24h": 0
 },
 {
-  "symbol": "ETH",
-  "name": "Ether",
+  "symbol": "ETH/USD",
+  "name": "ETH/USD",
   "decimals": 18,
   "address": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
   "logoURI": "https://tokens.1inch.io/0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee.png",
@@ -206,13 +206,13 @@ export const initialTokens = [{
       "PEG:ETH"
   ],
   "chainId": 1,
-  "label": "ETH",
+  "label": "ETH/USD",
   "value": "0xeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeeee",
   "geckoId": null,
   "volume24h": 0
 },
 {
-  "name": "BTC",
+  "name": "BTC/USD",
   "address": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
   "symbol": "BTC",
   "decimals": 8,
@@ -231,7 +231,7 @@ export const initialTokens = [{
           }
       }
   },
-  "label": "BTC",
+  "label": "BTC/USD",
   "value": "0x2260fac5e5542a773aa44fbcfedf7c193bc2c599",
   "geckoId": null,
   "volume24h": 11952137.412008408

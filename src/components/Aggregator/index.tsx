@@ -9,6 +9,8 @@ import { ArrowRight } from 'react-feather';
 import styled from 'styled-components';
 import Select from "react-select"
 
+import Web3 from 'web3';
+
 import {
 	Heading,
 	useToast,
@@ -307,24 +309,7 @@ const styles = {
 
 const chains = getAllChains();
 
-const [user, setUser] = useState("");
 
-const connectWallet = async (e) => {
-	e.preventDefault();
-	if(window.ethereum) {
-			await window.ethereum.request({ method: "eth_requestAccounts"});
-			window.web3 = new Web3(window.ethereum);
-
-			const account = web3.eth.accounts;
-
-			const walletAddress = account.givenProvider.selectedAddress;
-			setUser(walletAddress);
-
-			console.log(`Wallet: ${walletAddress}`);
-	} else {
-		console.log("No wallet");
-	}
-}
 
 const marks = {
 	2: <span style={{ color: 'black' }}>2</span>,
@@ -355,6 +340,7 @@ export function AggregatorContainer({ tokenlist }) {
 	const [amount, setAmount] = useState<number | string>('10');
 	const [selectedOption, setSelectedOption] = useState(null);
 	const [slippage, setSlippage] = useState<string>('0.5');
+	const [ethereumAccount, setEthereumAccount] = useState<string | null>(null);
 
 	// post swap states
 	const [txModalOpen, setTxModalOpen] = useState(false);
@@ -373,6 +359,21 @@ export function AggregatorContainer({ tokenlist }) {
 		tokens: tokenlist
 	});
 	const isValidSelectedChain = selectedChain && chainOnWallet ? selectedChain.id === chainOnWallet.id : false;
+
+
+	async function connectMetamaskWallet(): Promise<void> {
+		//to get around type checking
+		(window as any).ethereum
+		  .request({
+			  method: "eth_requestAccounts",
+		  })
+		  .then((accounts : string[]) => {
+			setEthereumAccount(accounts[0]);
+		  })
+		  .catch((error: any) => {
+			  alert(`Something went wrong: ${error}`);
+		  });
+	  }
 
 	// data of selected token not in chain's tokenlist
 	const { data: fromToken2 } = useToken({
@@ -1055,7 +1056,7 @@ export function AggregatorContainer({ tokenlist }) {
 						</Button>
 						<SwapWrapper>
 							{!isConnected ? (
-								<Button bgColor={'#2D00FF'} onClick={connectWallet()} marginBottom={'20px'}>
+								<Button bgColor={'#2D00FF'} onClick={connectMetamaskWallet} marginBottom={'20px'}>
 									Connect Wallet
 								</Button>
 							) : !isValidSelectedChain ? (

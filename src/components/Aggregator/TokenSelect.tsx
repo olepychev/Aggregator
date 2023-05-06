@@ -35,7 +35,7 @@ const Row = ({ chain, token, onClick }) => {
 					whiteSpace="nowrap"
 					textOverflow="ellipsis"
 					overflow="hidden"
-				>{`${token.name} (${token.symbol})`}</Text>
+				>{`${token.name}`}</Text>
 
 				{token.isGeckoToken && (
 					<>

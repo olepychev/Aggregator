@@ -7,16 +7,13 @@ import * as openocean from './adapters/openocean';
 import * as paraswap from './adapters/paraswap';
 import * as lifi from './adapters/lifi';
 import * as gmx from './adapters/openocean';
-import * as gns from './adapters/paraswap';
-// import * as rango from './adapters/rango';
+import * as gns from './adapters/GNS';
 
-// import * as unidex from "./adapters/unidex" - disabled, their api is broken
-// import * as airswap from './adapters/airswap' cors
-// import * as odos from './adapters/odos';
 import * as yieldyak from './adapters/yieldyak';
 import { capitalizeFirstLetter } from '~/utils';
 import { allChains } from '../WalletProvider/chains';
 import { chainNamesReplaced, chainsMap } from './constants';
+
 // import * as krystal from './adapters/krystal'
 
 export const adapters = [gmx, gns];
