@@ -69,7 +69,7 @@ const Route = ({
 					</Text>
 					<Text fontSize={19} fontWeight={600} marginLeft={'4px'} color={'#181B20'}>
 						{/* {toToken?.symbol} */}
-						{symbol}
+						USD
 					</Text>
 				</Flex>
 				<Text fontWeight={500} fontSize={16} color={'#181B20'}>

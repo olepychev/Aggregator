@@ -3,9 +3,9 @@ import { mainnet } from 'viem/chains'
 
 declare let window: any;
 
-export const walletClient = typeof window !== 'undefined' ? createWalletClient({
+export const walletClient = typeof window != 'undefined'? createWalletClient({
   chain: mainnet,
-  transport:  custom(window.ethereum)
+  transport:  custom(window?.ethereum)
 }) : null
 
 export const publicClient = createPublicClient({
