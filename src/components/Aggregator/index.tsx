@@ -62,6 +62,34 @@ import { useSelectedChainAndTokens } from '~/hooks/useSelectedChainAndTokens';
 import { useCountdown } from '~/hooks/useCountdown';
 import { RepeatIcon } from '@chakra-ui/icons';
 
+
+import CalculateRoute from '~/components/CalculateRoute';
+import readFromContract from './getGNSprice';
+import contractAPI from "./contractABI/GNSPrice.json";
+import { token } from './adapters/0x';
+
+
+const assetPairAddress = [
+	{
+	  contractAddress: '0xc907E116054Ad103354f2D350FD2514433D57F6f',  
+	  asset: 'BTC/USD'
+	},
+	{
+	 contractAddress: '0xF9680D99D6C9589e2a93a78A04A279e509205945',
+	 asset: 'ETH/USD'
+   },
+   {
+	 contractAddress: '0xF9680D99D6C9589e2a93a78A04A279e509205945',
+	 asset: 'LINK/USD'
+   },
+   {
+	 contractAddress: '0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C',
+	 asset: 'UNI/USD'
+   }
+ ]
+ 
+ const dummyABI = contractAPI;
+
 /*
 Integrated:
 - paraswap
@@ -111,42 +139,6 @@ cant integrate:
 - wardenswap - no api + sdk is closed source
 - https://twitter.com/DexibleApp - not an aggregator, only supports exotic orders like TWAP, segmented order, stop loss...
 */
-
-
-import readFromContract from './getGNSprice';
-import path from 'path';
-import {fs} from 'fs';
-// const path = require("path");
-// const readFromContract = require('./getGNSprice');
-// const fs = import ("fs");
-
-const abiPath = path.resolve("contractABI/GNSPrice.json");  
-const rawData = fs.readFileSync(abiPath);  
-const contractAbi = JSON.parse(rawData);
-
-
-const assetPairAddress = [
-   {
-     contractAddress: '0xc907E116054Ad103354f2D350FD2514433D57F6f',  
-     asset: 'BTC/USD'
-   },
-   {
-    contractAddress: '0xF9680D99D6C9589e2a93a78A04A279e509205945',
-    asset: 'ETH/USD'
-  },
-  {
-    contractAddress: '0xF9680D99D6C9589e2a93a78A04A279e509205945',
-    asset: 'LINK/USD'
-  },
-  {
-    contractAddress: '0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C',
-    asset: 'UNI/USD'
-  }
-]
-
-const dummyABI = contractAbi;
-
-
 
 const Body = styled.div<{ showRoutes: boolean }>`
 	display: flex;
@@ -381,6 +373,28 @@ export function AggregatorContainer({ tokenlist }) {
 	// post swap states
 	const [txModalOpen, setTxModalOpen] = useState(false);
 	const [txUrl, setTxUrl] = useState('');
+	
+	const [selectedToken, setSelectedToken] = useState(null);
+	const [price, setPrice] = useState(0);
+
+	useEffect(() => {
+		(async () => {
+			console.log('token => ', selectedToken)
+			for (let i = 0; i < assetPairAddress.length; i++) {
+			//   const result = await readFromContract(assetPairAddress[i].contractAddress, dummyABI);
+				if(assetPairAddress[i].asset == selectedToken?.name) {
+					const result = await readFromContract(assetPairAddress[i].contractAddress, dummyABI);
+					console.log('result=> ', result)
+					setPrice(result);
+				}
+
+			  //here money
+			}
+		  })();
+	}, [selectedToken])
+
+	const [isCalculate, setCalculate] = useState(false);
+
 	const confirmingTxToastRef = useRef<ToastId>();
 	const toast = useToast();
 
@@ -396,12 +410,6 @@ export function AggregatorContainer({ tokenlist }) {
 	});
 	const isValidSelectedChain = selectedChain && chainOnWallet ? selectedChain.id === chainOnWallet.id : false;
 
-
-	const [selectedToken, setSelectedToken] = useState(null);
-
-	useEffect(() => {
-		console.log(selectedToken);
-	}, [selectedToken])
 
 	async function connectMetamaskWallet(): Promise<void> {
 		//to get around type checking
@@ -648,16 +656,16 @@ export function AggregatorContainer({ tokenlist }) {
 			});
 	};
 	const onFromTokenChange = (token) => {
+		setSelectedToken(token);
+		setCalculate(false);
 		setAggregator(null);
-	
-
-		// router.push({ pathname: router.pathname, query: { ...router.query, from: token.address } }, undefined, {
-		// 	shallow: true
-		// });
-
+		router.push({ pathname: router.pathname, query: { ...router.query, from: token.address } }, undefined, {
+			shallow: true
+		});
 	};
 	const onToTokenChange = (token) => () => {
 		setAggregator(null);
+		setCalculate(true);
 		router.push({ pathname: router.pathname, query: { ...router.query, to: token?.address || undefined } }, undefined, {
 			shallow: true
 		});
@@ -897,7 +905,6 @@ export function AggregatorContainer({ tokenlist }) {
 			});
 		}
 	};
-
 	// console.log(finalSelectedFromToken);
 	return (
 		<div style={{ marginTop: '100px' }}>
@@ -935,7 +942,7 @@ export function AggregatorContainer({ tokenlist }) {
 							<TokenSelect
 								tokens={tokensInChain.filter(({ address }) => address !== finalSelectedToToken?.address)}
 								token={finalSelectedFromToken}
-								onClick={(token) => setSelectedToken(token)}
+								onClick={onFromTokenChange}
 								selectedChain={selectedChain}
 							/>
 
@@ -1097,9 +1104,9 @@ export function AggregatorContainer({ tokenlist }) {
 				</Alert>
 			</>
 		) : null} */}
-						{/* <Button bgColor={'#381CB8'} onClick={onToTokenChange(finalSelectedFromToken)}>
+						<Button bgColor={'#381CB8'} onClick={onToTokenChange(finalSelectedFromToken)}>
 							Calculate
-						</Button> */}
+						</Button>
 
 						<Connect></Connect>
 						{/* <SwapWrapper>
@@ -1239,7 +1246,7 @@ export function AggregatorContainer({ tokenlist }) {
 						  finalSelectedFromToken &&
 						  finalSelectedToToken &&
 						  routes &&
-						  routes.length ? (
+						  routes.length && !isCalculate ? (
 							<FormHeader>No available routes found</FormHeader>
 						) : null}
 						<span style={{ fontSize: '12px', color: '#999999', marginLeft: '4px', marginTop: '4px', display: 'flex' }}>
@@ -1252,7 +1259,7 @@ export function AggregatorContainer({ tokenlist }) {
 							<RoutesPreview />
 						) : null}
 
-						{normalizedRoutes.map((r, i) => (
+						{!isCalculate && normalizedRoutes.map((r, i) => (
 							<Fragment
 								key={
 									selectedChain.label +
@@ -1263,9 +1270,12 @@ export function AggregatorContainer({ tokenlist }) {
 									r?.name
 								}
 							>
+								
 								<SwapRoute
 									{...r}
 									index={i}
+									currentPrice={price}
+									symbol={selectedToken?.symbol}
 									selected={aggregator === r.name}
 									setRoute={() => setAggregator(r.name)}
 									toToken={finalSelectedToToken}
@@ -1380,7 +1390,23 @@ export function AggregatorContainer({ tokenlist }) {
 									</SwapUnderRoute>
 								)}
 							</Fragment>
-						))}
+						))
+						}
+						{isCalculate && (
+							 <CalculateRoute
+								currentPrice={price}
+								symbol={selectedToken?.symbol}
+								selected={false}
+								setRoute={() => setAggregator(null)}
+								toToken={finalSelectedToToken}
+								amountFrom={amountWithDecimals}
+								fromToken={finalSelectedFromToken}
+								selectedChain={selectedChain.label}
+								gasTokenPrice={gasTokenPrice}
+								isFetchingGasPrice={fetchingTokenPrices}
+							/>
+						)}
+						
 					</Routes>
 				</BodyWrapper>
 

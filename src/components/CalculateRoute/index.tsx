@@ -23,8 +23,6 @@ interface IPrice {
 }
 
 interface IRoute {
-	name: string;
-	price: IPrice;
 	symbol: any;
 	currentPrice: any;
 	toToken: IToken;
@@ -32,47 +30,28 @@ interface IRoute {
 	selectedChain: string;
 	setRoute: () => void;
 	selected: boolean;
-	index: number;
-	gasUsd: number | string;
-	amountUsd: string;
-	airdrop: boolean;
 	amountFrom: string;
-	lossPercent: number;
 	gasTokenPrice: number;
-	txData: string;
-	netOut: number;
 	isFetchingGasPrice: boolean;
 }
 
 const Route = ({
-	name,
-	price,
 	currentPrice,
 	symbol,
 	toToken,
 	setRoute,
-	selected,
-	index,
-	gasUsd,
-	airdrop,
 	fromToken,
+	selected,
 	amountFrom,
-	lossPercent,
-	netOut,
 	isFetchingGasPrice
 }: IRoute) => {
-	const { isApproved } = useTokenApprove(fromToken?.address, price?.tokenApprovalAddress as `0x${string}`, amountFrom);
+	// const { isApproved } = useTokenApprove(fromToken?.address, price?.tokenApprovalAddress as `0x${string}`, amountFrom);
 
-	if (!price.amountReturned || (Number(gasUsd) === 0 && name !== 'CowSwap')) return null;
 
-	const amount = +price.amountReturned / 10 ** +toToken?.decimals;
-	// const amount = currentPrice / 100000000;
-	console.log('amout=> ', amount)
+	// const amount = +currentPrice / 10 ** +toToken?.decimals;
+	const amount = currentPrice/100000000;
+	console.log('amout=> ', currentPrice/100000000)
 
-	const afterFees =
-		netOut && Number.isFinite(Number(netOut)) ? `$${formattedNum(netOut.toFixed(1), false, true)}` : null;
-	const isGasNotKnown = gasUsd === 'Unknown' || Number.isNaN(Number(gasUsd));
-	const txGas = isGasNotKnown ? '' : '$' + formattedNum(gasUsd);
 	let setTextcolor = '';
 
 	return (
@@ -80,7 +59,7 @@ const Route = ({
 			onClick={setRoute}
 			className={selected ? 'RouteWrapper is-selected' : 'RouteWrapper'}
 			selected={selected}
-			best={index === 0}
+			best={true}
 			
 		>
 			<RouteRow >
@@ -95,62 +74,43 @@ const Route = ({
 				</Flex>
 				<Text fontWeight={500} fontSize={16} color={'#181B20'}>
 					<Flex as="span" alignItems="center" gap="8px">
-						{index === 0 ? (
+
 							<Text as="span" color="#059669" fontSize={14} fontWeight={700}>
 								BEST
 							</Text>
-						) : Number.isFinite(lossPercent) ? (
-							<Text as="span" color="red.600" fontSize={12}>
-								-{Math.abs(100 - lossPercent * 100).toFixed(2)}%
-							</Text>
-						) : null}
 					</Flex>
 				</Text>
 			</RouteRow>
 
 			<RouteRow>
 				<Flex className='mobile-column' as="span" columnGap="4px" display="flex" color="#181B20" fontWeight={500}>
-					<span>{`≈ ${afterFees} `}</span>
-					{isGasNotKnown && !isFetchingGasPrice ? (
-						<Flex as="span" gap="4px" alignItems="center" color="#d97706" className="inline-alert">
-							<AlertCircle size="14" /> unknown gas fees
-						</Flex>
-					) : (
-						<span>after fees</span>
-					)}
+					<span></span>
+					<span>after fees</span>
 				</Flex>
 
-				{airdrop ? (
-					<Tooltip content="This project has no token and might airdrop one in the future">
-						<Gift size={14} color="#A0AEC0" />
-					</Tooltip>
-				) : null}
+				<Tooltip content="This project has no token and might airdrop one in the future">
+					<Gift size={14} color="#A0AEC0" />
+				</Tooltip>
+				
 
 				<Text display="flex" columnGap="6px" color={'#181B20'} fontWeight={500} ml="auto">
 					<Text display="flex" className='mobile-column mobile-flexend' alignItems="center" gap="4px" color="#181B20">
-						{name === 'CowSwap' ? (
 							<Tooltip content="Gas is taken from output amount">
 								<Text as="span" display="flex" alignItems="center" gap="4px" color="#181B20" fontWeight={500}>
-									{isGasNotKnown ? null : <GasIcon />}
-									{txGas}
+									 <GasIcon />
+									
 								</Text>
 							</Tooltip>
-						) : (
-							<Text as="span" display="flex" alignItems="center" gap="4px" fontWeight={500}>
-								{isGasNotKnown ? null : <GasIcon />}
-								{txGas}
-							</Text>
-						)}
 						<Text display="flex" gap="3px">
 							via
-							{isApproved ? (
+							{/* {isApproved ? ( */}
 								<Tooltip content="Token is approved for this aggregator.">
 									<Unlock size={14} color="#059669" />
 								</Tooltip>
-							) : (
+							{/* ) : (
 								' '
 							)}
-							{name}
+							{name} */}
 						</Text>
 					</Text>
 				</Text>
