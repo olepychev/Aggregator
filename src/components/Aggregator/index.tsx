@@ -1220,7 +1220,7 @@ export function AggregatorContainer({ tokenlist }) {
 						</SwapWrapper> */}
 					</Body>
 
-					<Routes routes ref={routesRef}>
+					<Routes ref={routesRef}>
 						{normalizedRoutes?.length ? (
 							<Flex alignItems="center" justifyContent="space-between">
 								<p style={{ color: '#121212', fontWeight: 'bold', fontSize: '20px' }}>

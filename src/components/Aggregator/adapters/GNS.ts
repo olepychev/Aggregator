@@ -64,7 +64,9 @@ const assetPairAddress = [
   export async function getQuote(chain: string, from: string, to: string, amount: string, extra) {
 	// amount should include decimals
 
-	const data = await useReadDataFromContract().then((r) => r.json());
+	// const data = await useReadDataFromContract().then((r) => r.json());
+	const data = 0;
+  
 
 
 	return {
