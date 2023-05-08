@@ -8,7 +8,7 @@
 		"analyze": "ANALYZE=true yarn build",
 		"dev": "next dev",
 		"format": "prettier --write .",
-		"build": "next build && ./post-build.sh",
+		"build": "next build",
 		"start": "next start",
 		"lint": "next lint"
 	},
