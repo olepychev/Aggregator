@@ -67,14 +67,15 @@ import CalculateRoute from '~/components/CalculateRoute';
 import readFromContract from './getGNSprice';
 import contractAPI from "./contractABI/GNSPrice.json";
 import { token } from './adapters/0x';
+import axios from 'axios';
 
-const assetPrice = [
+const assetGMXPrice = [
     {
-        '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f': '28884576620000000000000000000000000',  // BTC/USD
-        '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1': '1905473534000000000000000000000000',   // ETH/USD
-        '0xf97f4df75117a78c1A5a0DBb814Af92458539FB4': '6932146100000000000000000000000',      // LINK/USD 
-        '0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0': '5315079500000000000000000000000'      //  UNI/USD
-      }
+        'BTC/USD': '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',  // BTC/USD
+        'ETH/USD': '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',   // ETH/USD
+        'LINK/USD': '0xf97f4df75117a78c1A5a0DBb814Af92458539FB4',      // LINK/USD 
+        'UNI/USD': '0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0'    //  UNI/USD
+	}
 ]
 
 // const response = await axios.get('https://api.gmx.io/prices');
@@ -387,6 +388,7 @@ export function AggregatorContainer({ tokenlist }) {
 	
 	const [selectedToken, setSelectedToken] = useState(null);
 	const [price, setPrice] = useState(0);
+	const [gmxPrice, setGMXPrice] = useState(0);
 
 	useEffect(() => {
 		(async () => {
@@ -400,6 +402,12 @@ export function AggregatorContainer({ tokenlist }) {
 
 			  //here money
 			}
+
+			const response = await axios.get('https://api.gmx.io/prices');
+			var tok = selectedToken?.name ;
+			console.log('response priec from GMX=>', assetGMXPrice[0][tok])
+			setGMXPrice(response['data'][assetGMXPrice[0][tok]])
+			
 		  })();
 	}, [selectedToken])
 
@@ -1403,18 +1411,38 @@ export function AggregatorContainer({ tokenlist }) {
 						))
 						}
 						{isCalculate && (
-							 <CalculateRoute
-								currentPrice={price}
-								symbol={selectedToken?.symbol}
-								selected={false}
-								setRoute={() => setAggregator(null)}
-								toToken={finalSelectedToToken}
-								amountFrom={amountWithDecimals}
-								fromToken={finalSelectedFromToken}
-								selectedChain={selectedChain.label}
-								gasTokenPrice={gasTokenPrice}
-								isFetchingGasPrice={fetchingTokenPrices}
-							/>
+							<>
+								<CalculateRoute
+									key="0"
+									currentPrice={price}
+									symbol={selectedToken?.symbol}
+									selected={false}
+									type="gains.trade"
+									setRoute={() => setAggregator(null)}
+									toToken={finalSelectedToToken}
+									amountFrom={amountWithDecimals}
+									fromToken={finalSelectedFromToken}
+									selectedChain={selectedChain.label}
+									gasTokenPrice={gasTokenPrice}
+									isFetchingGasPrice={fetchingTokenPrices}
+								/>
+
+								<CalculateRoute
+									key="1"
+									currentPrice={gmxPrice}
+									symbol={selectedToken?.symbol}
+									selected={false}
+									setRoute={() => setAggregator(null)}
+									type="GMX"
+									toToken={finalSelectedToToken}
+									amountFrom={amountWithDecimals}
+									fromToken={finalSelectedFromToken}
+									selectedChain={selectedChain.label}
+									gasTokenPrice={gasTokenPrice}
+									isFetchingGasPrice={fetchingTokenPrices}
+								/>
+							</>
+
 						)}
 						
 					</Routes>

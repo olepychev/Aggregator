@@ -32,6 +32,7 @@ interface IRoute {
 	selected: boolean;
 	amountFrom: string;
 	gasTokenPrice: number;
+	type: string;
 	isFetchingGasPrice: boolean;
 }
 
@@ -43,13 +44,17 @@ const Route = ({
 	fromToken,
 	selected,
 	amountFrom,
+	type,
 	isFetchingGasPrice
 }: IRoute) => {
 	// const { isApproved } = useTokenApprove(fromToken?.address, price?.tokenApprovalAddress as `0x${string}`, amountFrom);
 
 
 	// const amount = +currentPrice / 10 ** +toToken?.decimals;
-	const amount = currentPrice/100000000;
+	var amount;
+	if(type != 'GMX')
+		amount = currentPrice/100000000;
+	else amount = currentPrice/1000000000000000000000000000000;
 	// console.log('amout=> ', currentPrice/100000000)
 
 	let setTextcolor = '';
@@ -102,7 +107,7 @@ const Route = ({
 								</Text>
 							</Tooltip>
 						<Text display="flex" gap="3px">
-							via gains.trade
+							via {type}
 							{/* {isApproved ? ( */}
 								<Tooltip content="Token is approved for this aggregator.">
 									<Unlock size={14} color="#059669" />
