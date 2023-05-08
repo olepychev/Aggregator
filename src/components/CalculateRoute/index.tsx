@@ -50,7 +50,7 @@ const Route = ({
 
 	// const amount = +currentPrice / 10 ** +toToken?.decimals;
 	const amount = currentPrice/100000000;
-	console.log('amout=> ', currentPrice/100000000)
+	// console.log('amout=> ', currentPrice/100000000)
 
 	let setTextcolor = '';
 
@@ -102,7 +102,7 @@ const Route = ({
 								</Text>
 							</Tooltip>
 						<Text display="flex" gap="3px">
-							via
+							via gains.trade
 							{/* {isApproved ? ( */}
 								<Tooltip content="Token is approved for this aggregator.">
 									<Unlock size={14} color="#059669" />

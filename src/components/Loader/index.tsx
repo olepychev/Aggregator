@@ -61,6 +61,7 @@ export const LoaderHOC = <P extends object>(
     const ComponentWithLoader = (props: P) => {
         if (loadingCondition()) return <Loader />
 
+        // @ts-ignore
         return <Component {...(props as P)} />
     }
 

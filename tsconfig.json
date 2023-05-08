@@ -21,7 +21,9 @@
 		"incremental": true,
 		"downlevelIteration": true,
 		"allowSyntheticDefaultImports": true,
-		"noFallthroughCasesInSwitch": true
+		"noFallthroughCasesInSwitch": true,
+		"noImplicitReturns": true,
+		"noImplicitThis": true,
 	},
 	"exclude": ["node_modules", "cypress"],
 	"include": ["**/*.js", "**/*.ts", "**/*.tsx"]

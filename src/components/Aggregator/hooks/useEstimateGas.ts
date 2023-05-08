@@ -12,6 +12,7 @@ const traceRpcs = {
 	polygon: 'https://polygon.llamarpc.com'
 };
 
+// @ts-ignore
 export const estimateGas = async ({ route, token, userAddress, chain, amount }) => {
 	try {
 		const provider = new ethers.providers.JsonRpcProvider(traceRpcs[chain]);
