@@ -8,8 +8,6 @@ import BigNumber from 'bignumber.js';
 import { ArrowRight } from 'react-feather';
 import styled from 'styled-components';
 import Select from "react-select"
-import Web3 from 'web3';
-import Connect from '../Connect/ConnectButton';
 
 import {
 	Heading,
@@ -61,46 +59,6 @@ import { useQueryParams } from '~/hooks/useQueryParams';
 import { useSelectedChainAndTokens } from '~/hooks/useSelectedChainAndTokens';
 import { useCountdown } from '~/hooks/useCountdown';
 import { RepeatIcon } from '@chakra-ui/icons';
-
-
-import CalculateRoute from '~/components/CalculateRoute';
-import readFromContract from './getGNSprice';
-import contractAPI from "./contractABI/GNSPrice.json";
-import { token } from './adapters/0x';
-import axios from 'axios';
-
-const assetGMXPrice = [
-    {
-        'BTC/USD': '0x2f2a2543B76A4166549F7aaB2e75Bef0aefC5B0f',  // BTC/USD
-        'ETH/USD': '0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',   // ETH/USD
-        'LINK/USD': '0xf97f4df75117a78c1A5a0DBb814Af92458539FB4',      // LINK/USD 
-        'UNI/USD': '0xFa7F8980b0f1E64A2062791cc3b0871572f1F7f0'    //  UNI/USD
-	}
-]
-
-// const response = await axios.get('https://api.gmx.io/prices');
-// console.log(response.data[0]);
-
-const assetPairAddress = [
-	{
-	  contractAddress: '0xc907E116054Ad103354f2D350FD2514433D57F6f',  
-	  asset: 'BTC/USD'
-	},
-	{
-	 contractAddress: '0xF9680D99D6C9589e2a93a78A04A279e509205945',
-	 asset: 'ETH/USD'
-   },
-   {
-	 contractAddress: '0xF9680D99D6C9589e2a93a78A04A279e509205945',
-	 asset: 'LINK/USD'
-   },
-   {
-	 contractAddress: '0xdf0Fb4e4F928d2dCB76f438575fDD8682386e13C',
-	 asset: 'UNI/USD'
-   }
- ]
- 
- const dummyABI = contractAPI;
 
 /*
 Integrated:
@@ -349,8 +307,6 @@ const styles = {
 
 const chains = getAllChains();
 
-
-
 const marks = {
 	2: <span style={{ color: 'black' }}>2</span>,
 	25: <span style={{ color: 'black' }}>25</span>,
@@ -380,39 +336,10 @@ export function AggregatorContainer({ tokenlist }) {
 	const [amount, setAmount] = useState<number | string>('10');
 	const [selectedOption, setSelectedOption] = useState(null);
 	const [slippage, setSlippage] = useState<string>('0.5');
-	const [ethereumAccount, setEthereumAccount] = useState<string | null>(null);
 
 	// post swap states
 	const [txModalOpen, setTxModalOpen] = useState(false);
 	const [txUrl, setTxUrl] = useState('');
-	
-	const [selectedToken, setSelectedToken] = useState(null);
-	const [price, setPrice] = useState(0);
-	const [gmxPrice, setGMXPrice] = useState(0);
-
-	useEffect(() => {
-		(async () => {
-			for (let i = 0; i < assetPairAddress.length; i++) {
-			//   const result = await readFromContract(assetPairAddress[i].contractAddress, dummyABI);
-				if(assetPairAddress[i].asset == selectedToken?.name) {
-					const result = await readFromContract(assetPairAddress[i].contractAddress, dummyABI);
-					console.log('result=> ', result)
-					setPrice(result);
-				}
-
-			  //here money
-			}
-
-			const response = await axios.get('https://api.gmx.io/prices');
-			var tok = selectedToken?.name ;
-			console.log('response priec from GMX=>', assetGMXPrice[0][tok])
-			setGMXPrice(response['data'][assetGMXPrice[0][tok]])
-			
-		  })();
-	}, [selectedToken])
-
-	const [isCalculate, setCalculate] = useState(false);
-
 	const confirmingTxToastRef = useRef<ToastId>();
 	const toast = useToast();
 
@@ -427,21 +354,6 @@ export function AggregatorContainer({ tokenlist }) {
 		tokens: tokenlist
 	});
 	const isValidSelectedChain = selectedChain && chainOnWallet ? selectedChain.id === chainOnWallet.id : false;
-
-
-	async function connectMetamaskWallet(): Promise<void> {
-		//to get around type checking
-		(window as any).ethereum
-		  .request({
-			  method: "eth_requestAccounts",
-		  })
-		  .then((accounts : string[]) => {
-			setEthereumAccount(accounts[0]);
-		  })
-		  .catch((error: any) => {
-			  alert(`Something went wrong: ${error}`);
-		  });
-	  }
 
 	// data of selected token not in chain's tokenlist
 	const { data: fromToken2 } = useToken({
@@ -674,8 +586,6 @@ export function AggregatorContainer({ tokenlist }) {
 			});
 	};
 	const onFromTokenChange = (token) => {
-		setSelectedToken(token);
-		setCalculate(false);
 		setAggregator(null);
 		router.push({ pathname: router.pathname, query: { ...router.query, from: token.address } }, undefined, {
 			shallow: true
@@ -683,7 +593,6 @@ export function AggregatorContainer({ tokenlist }) {
 	};
 	const onToTokenChange = (token) => () => {
 		setAggregator(null);
-		setCalculate(true);
 		router.push({ pathname: router.pathname, query: { ...router.query, to: token?.address || undefined } }, undefined, {
 			shallow: true
 		});
@@ -923,7 +832,7 @@ export function AggregatorContainer({ tokenlist }) {
 			});
 		}
 	};
-	// console.log(finalSelectedFromToken);
+	console.log(finalSelectedFromToken);
 	return (
 		<div style={{ marginTop: '100px' }}>
 			<Wrapper>
@@ -932,13 +841,7 @@ export function AggregatorContainer({ tokenlist }) {
 					<p style={{ fontSize: '40px', fontWeight: 'bold', color: 'black' }}>Alpaca</p>
 					<img src="Line1.png" style={{ marginLeft: '70px' }} />
 					<p style={{ color: '#E2000F', fontSize: '30px', fontWeight: 'bold', marginLeft: '70px', marginTop: '15px' }}>
-						My Freelancer account was closed.
-
-########## Let's contact with me. #############
-
-Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@gmail.com
-
-#############################################################
+						PERPETUAL META-AGGREGATOR
 					</p>
 				</div>
 
@@ -1131,15 +1034,13 @@ Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@g
 						<Button bgColor={'#381CB8'} onClick={onToTokenChange(finalSelectedFromToken)}>
 							Calculate
 						</Button>
-
-						<Connect></Connect>
-						{/* <SwapWrapper>
-							{!ethereumAccount ? (
-								<Button bgColor={'#2D00FF'} onClick={connectMetamaskWallet} marginBottom={'20px'}>
+						<SwapWrapper>
+							{!isConnected ? (
+								<Button bgColor={'#2D00FF'} onClick={openConnectModal} marginBottom={'20px'}>
 									Connect Wallet
 								</Button>
 							) : !isValidSelectedChain ? (
-								<Button bgColor={'#2D00FF'} onClick={() => switchNetwork?.(selectedChain.id)}>
+								<Button bgColor={'#2D00FF'} onClick={() => switchNetwork(selectedChain.id)}>
 									Switch Network
 								</Button>
 							) : insufficientBalance ? (
@@ -1241,10 +1142,10 @@ Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@g
 									)}
 								</>
 							)}
-						</SwapWrapper> */}
+						</SwapWrapper>
 					</Body>
 
-					<Routes ref={routesRef}>
+					<Routes outes ref={routesRef}>
 						{normalizedRoutes?.length ? (
 							<Flex alignItems="center" justifyContent="space-between">
 								<p style={{ color: '#121212', fontWeight: 'bold', fontSize: '20px' }}>
@@ -1270,7 +1171,7 @@ Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@g
 						  finalSelectedFromToken &&
 						  finalSelectedToToken &&
 						  routes &&
-						  routes.length && !isCalculate ? (
+						  routes.length ? (
 							<FormHeader>No available routes found</FormHeader>
 						) : null}
 						<span style={{ fontSize: '12px', color: '#999999', marginLeft: '4px', marginTop: '4px', display: 'flex' }}>
@@ -1283,7 +1184,7 @@ Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@g
 							<RoutesPreview />
 						) : null}
 
-						{!isCalculate && normalizedRoutes.map((r, i) => (
+						{normalizedRoutes.map((r, i) => (
 							<Fragment
 								key={
 									selectedChain.label +
@@ -1294,12 +1195,9 @@ Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@g
 									r?.name
 								}
 							>
-								
 								<SwapRoute
 									{...r}
 									index={i}
-									currentPrice={price}
-									symbol={selectedToken?.symbol}
 									selected={aggregator === r.name}
 									setRoute={() => setAggregator(r.name)}
 									toToken={finalSelectedToToken}
@@ -1312,12 +1210,12 @@ Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@g
 
 								{aggregator === r.name && (
 									<SwapUnderRoute>
-										{!ethereumAccount ? (
+										{!isConnected ? (
 											<ConnectButtonWrapper>
 												<ConnectButton />
 											</ConnectButtonWrapper>
 										) : !isValidSelectedChain ? (
-											<Button colorScheme={'messenger'} onClick={() => switchNetwork?.(selectedChain.id)}>
+											<Button colorScheme={'messenger'} onClick={() => switchNetwork(selectedChain.id)}>
 												Switch Network
 											</Button>
 										) : (
@@ -1414,43 +1312,7 @@ Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@g
 									</SwapUnderRoute>
 								)}
 							</Fragment>
-						))
-						}
-						{isCalculate && (
-							<>
-								<CalculateRoute
-									key="0"
-									currentPrice={price}
-									symbol={selectedToken?.symbol}
-									selected={false}
-									type="gains.trade"
-									setRoute={() => setAggregator(null)}
-									toToken={finalSelectedToToken}
-									amountFrom={amountWithDecimals}
-									fromToken={finalSelectedFromToken}
-									selectedChain={selectedChain.label}
-									gasTokenPrice={gasTokenPrice}
-									isFetchingGasPrice={fetchingTokenPrices}
-								/>
-
-								<CalculateRoute
-									key="1"
-									currentPrice={gmxPrice}
-									symbol={selectedToken?.symbol}
-									selected={false}
-									setRoute={() => setAggregator(null)}
-									type="GMX"
-									toToken={finalSelectedToToken}
-									amountFrom={amountWithDecimals}
-									fromToken={finalSelectedFromToken}
-									selectedChain={selectedChain.label}
-									gasTokenPrice={gasTokenPrice}
-									isFetchingGasPrice={fetchingTokenPrices}
-								/>
-							</>
-
-						)}
-						
+						))}
 					</Routes>
 				</BodyWrapper>
 
