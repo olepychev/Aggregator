@@ -28,7 +28,7 @@ interface IRoute {
 	toToken: IToken;
 	fromToken: IToken;
 	selectedChain: string;
-	setRoute: () => void;
+	onCalClick: () => void;
 	selected: boolean;
 	amountFrom: string;
 	gasTokenPrice: number;
