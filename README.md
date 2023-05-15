@@ -1,5 +1,4 @@
 
-
 ### Running the app locally
 ```
 yarn install
