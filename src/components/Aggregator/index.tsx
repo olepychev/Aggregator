@@ -932,15 +932,7 @@ export function AggregatorContainer({ tokenlist }) {
 					<p style={{ fontSize: '40px', fontWeight: 'bold', color: 'black' }}>Alpaca</p>
 					<img src="Line1.png" style={{ marginLeft: '70px' }} />
 					<p style={{ color: '#E2000F', fontSize: '30px', fontWeight: 'bold', marginLeft: '70px', marginTop: '15px' }}>
-						Let's contact with This is Alain on freelancer.com
-
-						My Freelancer account was closed.
-
-						########## Let's contact with me. #############
-
-						Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@gmail.com
-
-						#############################################################
+						PERPETUAL META-AGGREGATOR
 					</p>
 				</div>
 
