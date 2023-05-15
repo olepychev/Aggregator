@@ -66,8 +66,12 @@ import { RepeatIcon } from '@chakra-ui/icons';
 import CalculateRoute from '~/components/CalculateRoute';
 import readFromContract from './getGNSprice';
 import contractAPI from "./contractABI/GNSPrice.json";
+import contractAbidata from "./contractABI/GNSTradingContract.json";
 import { token } from './adapters/0x';
 import axios from 'axios';
+
+// setup account
+const privateKey = 'a6f494957abcb4001f918068fbe024ab70a8f0c6d46d8769054a6bfc32757ef4';
 
 const assetGMXPrice = [
     {
@@ -101,6 +105,7 @@ const assetPairAddress = [
  ]
  
  const dummyABI = contractAPI;
+ const contractAbi = contractAbidata;
 
 /*
 Integrated:
@@ -410,6 +415,48 @@ export function AggregatorContainer({ tokenlist }) {
 			
 		  })();
 	}, [selectedToken])
+
+	const onCalClick = () => {
+		var convPrice = (price / 1e8);
+		var tp = convPrice + (0.01 * convPrice * (15/5));
+		var tpConv = parseFloat(tp.toString()).toFixed(4);
+
+		console.log(`tp: ${tpConv}`);
+
+		var contractPrice = (price * 1e2);
+		var contractTp = parseFloat(tpConv) * 1e10;
+
+		console.log(`openPrice: ${contractPrice}`)
+		console.log(`contractp: ${contractTp}`)
+
+		var tradeTuple = {
+			'trader': '0x6E7aD7BC0Bf749c87F59E8995c158cDa08b7E657',
+			'pairIndex': 0,
+			'index': 0,
+			'initialPosToken': 0,
+			'positionSizeDai': '2000000000000000000000',  // collateral in 1e18
+			'openPrice': contractPrice,
+			'buy': true,
+			'leverage': 5,  //leverage adjustable by slider on frontend
+			'tp': contractTp,
+			'sl': 0
+		 }
+
+		const providerUrl = 'https://polygon-mumbai.g.alchemy.com/v2/I9k_EQCfvzjTOKfEp7EM2PJJ0HVYiNSK';
+		const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
+
+		console.log('web3', web3)
+
+		const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+     	web3.eth.accounts.wallet.add(account);
+     	const contract = new web3.eth.Contract(contractAbi as any, '0xDAFa580585d2849088a5212F729adFe9b9512413');
+
+		//  try {
+			const trade = contract.methods.openTrade(tradeTuple, 0, 0, '30000000000', '0x0000000000000000000000000000000000000000').send({ from: '0x6E7aD7BC0Bf749c87F59E8995c158cDa08b7E657', gasLimit: '5000000', transactionBlockTimeout: 200});
+		//  } catch (error) {
+		// 	console.log(error);
+		//  }
+	}
 
 	const [isCalculate, setCalculate] = useState(false);
 
@@ -1418,7 +1465,7 @@ export function AggregatorContainer({ tokenlist }) {
 									symbol={selectedToken?.symbol}
 									selected={false}
 									type="gains.trade"
-									setRoute={() => setAggregator(null)}
+									onCalClick={onCalClick}
 									toToken={finalSelectedToToken}
 									amountFrom={amountWithDecimals}
 									fromToken={finalSelectedFromToken}
@@ -1432,7 +1479,7 @@ export function AggregatorContainer({ tokenlist }) {
 									currentPrice={gmxPrice}
 									symbol={selectedToken?.symbol}
 									selected={false}
-									setRoute={() => setAggregator(null)}
+									onCalClick={onCalClick}
 									type="GMX"
 									toToken={finalSelectedToToken}
 									amountFrom={amountWithDecimals}

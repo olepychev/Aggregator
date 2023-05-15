@@ -40,7 +40,7 @@ const Route = ({
 	currentPrice,
 	symbol,
 	toToken,
-	setRoute,
+	onCalClick,
 	fromToken,
 	selected,
 	amountFrom,
@@ -61,7 +61,7 @@ const Route = ({
 
 	return (
 		<RouteWrapper
-			onClick={setRoute}
+			onClick={onCalClick}
 			className={selected ? 'RouteWrapper is-selected' : 'RouteWrapper'}
 			selected={selected}
 			best={true}
