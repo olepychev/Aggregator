@@ -8,8 +8,6 @@ import BigNumber from 'bignumber.js';
 import { ArrowRight } from 'react-feather';
 import styled from 'styled-components';
 import Select from "react-select"
-import Web3 from 'web3';
-import Connect from '../Connect/ConnectButton';
 
 import {
 	Heading,
@@ -66,12 +64,8 @@ import { RepeatIcon } from '@chakra-ui/icons';
 import CalculateRoute from '~/components/CalculateRoute';
 import readFromContract from './getGNSprice';
 import contractAPI from "./contractABI/GNSPrice.json";
-import contractAbidata from "./contractABI/GNSTradingContract.json";
 import { token } from './adapters/0x';
 import axios from 'axios';
-
-// setup account
-const privateKey = 'a6f494957abcb4001f918068fbe024ab70a8f0c6d46d8769054a6bfc32757ef4';
 
 const assetGMXPrice = [
     {
@@ -105,7 +99,6 @@ const assetPairAddress = [
  ]
  
  const dummyABI = contractAPI;
- const contractAbi = contractAbidata;
 
 /*
 Integrated:
@@ -354,8 +347,6 @@ const styles = {
 
 const chains = getAllChains();
 
-
-
 const marks = {
 	2: <span style={{ color: 'black' }}>2</span>,
 	25: <span style={{ color: 'black' }}>25</span>,
@@ -385,7 +376,6 @@ export function AggregatorContainer({ tokenlist }) {
 	const [amount, setAmount] = useState<number | string>('10');
 	const [selectedOption, setSelectedOption] = useState(null);
 	const [slippage, setSlippage] = useState<string>('0.5');
-	const [ethereumAccount, setEthereumAccount] = useState<string | null>(null);
 
 	// post swap states
 	const [txModalOpen, setTxModalOpen] = useState(false);
@@ -416,48 +406,6 @@ export function AggregatorContainer({ tokenlist }) {
 		  })();
 	}, [selectedToken])
 
-	const onCalClick = () => {
-		var convPrice = (price / 1e8);
-		var tp = convPrice + (0.01 * convPrice * (15/5));
-		var tpConv = parseFloat(tp.toString()).toFixed(4);
-
-		console.log(`tp: ${tpConv}`);
-
-		var contractPrice = (price * 1e2);
-		var contractTp = parseFloat(tpConv) * 1e10;
-
-		console.log(`openPrice: ${contractPrice}`)
-		console.log(`contractp: ${contractTp}`)
-
-		var tradeTuple = {
-			'trader': '0x6E7aD7BC0Bf749c87F59E8995c158cDa08b7E657',
-			'pairIndex': 0,
-			'index': 0,
-			'initialPosToken': 0,
-			'positionSizeDai': '2000000000000000000000',  // collateral in 1e18
-			'openPrice': contractPrice,
-			'buy': true,
-			'leverage': 5,  //leverage adjustable by slider on frontend
-			'tp': contractTp,
-			'sl': 0
-		 }
-
-		const providerUrl = 'https://polygon-mumbai.g.alchemy.com/v2/I9k_EQCfvzjTOKfEp7EM2PJJ0HVYiNSK';
-		const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
-
-		console.log('web3', web3)
-
-		const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-     	web3.eth.accounts.wallet.add(account);
-     	const contract = new web3.eth.Contract(contractAbi as any, '0xDAFa580585d2849088a5212F729adFe9b9512413');
-
-		//  try {
-			const trade = contract.methods.openTrade(tradeTuple, 0, 0, '30000000000', '0x0000000000000000000000000000000000000000').send({ from: '0x6E7aD7BC0Bf749c87F59E8995c158cDa08b7E657', gasLimit: '5000000', transactionBlockTimeout: 200});
-		//  } catch (error) {
-		// 	console.log(error);
-		//  }
-	}
-
 	const [isCalculate, setCalculate] = useState(false);
 
 	const confirmingTxToastRef = useRef<ToastId>();
@@ -474,21 +422,6 @@ export function AggregatorContainer({ tokenlist }) {
 		tokens: tokenlist
 	});
 	const isValidSelectedChain = selectedChain && chainOnWallet ? selectedChain.id === chainOnWallet.id : false;
-
-
-	async function connectMetamaskWallet(): Promise<void> {
-		//to get around type checking
-		(window as any).ethereum
-		  .request({
-			  method: "eth_requestAccounts",
-		  })
-		  .then((accounts : string[]) => {
-			setEthereumAccount(accounts[0]);
-		  })
-		  .catch((error: any) => {
-			  alert(`Something went wrong: ${error}`);
-		  });
-	  }
 
 	// data of selected token not in chain's tokenlist
 	const { data: fromToken2 } = useToken({
@@ -721,8 +654,6 @@ export function AggregatorContainer({ tokenlist }) {
 			});
 	};
 	const onFromTokenChange = (token) => {
-		setSelectedToken(token);
-		setCalculate(false);
 		setAggregator(null);
 		router.push({ pathname: router.pathname, query: { ...router.query, from: token.address } }, undefined, {
 			shallow: true
@@ -730,7 +661,6 @@ export function AggregatorContainer({ tokenlist }) {
 	};
 	const onToTokenChange = (token) => () => {
 		setAggregator(null);
-		setCalculate(true);
 		router.push({ pathname: router.pathname, query: { ...router.query, to: token?.address || undefined } }, undefined, {
 			shallow: true
 		});
@@ -970,7 +900,7 @@ export function AggregatorContainer({ tokenlist }) {
 			});
 		}
 	};
-	// console.log(finalSelectedFromToken);
+	console.log(finalSelectedFromToken);
 	return (
 		<div style={{ marginTop: '100px' }}>
 			<Wrapper>
@@ -979,15 +909,7 @@ export function AggregatorContainer({ tokenlist }) {
 					<p style={{ fontSize: '40px', fontWeight: 'bold', color: 'black' }}>Alpaca</p>
 					<img src="Line1.png" style={{ marginLeft: '70px' }} />
 					<p style={{ color: '#E2000F', fontSize: '30px', fontWeight: 'bold', marginLeft: '70px', marginTop: '15px' }}>
-						Let's contact with This is Alain on freelancer.com
-
-						My Freelancer account was closed.
-
-						########## Let's contact with me. #############
-
-						Discord: Ha_Sven_Ha#4063 Skype: live:.cid.265d69c527633ef1 Gmail: dreambig.zac@gmail.com
-
-						#############################################################
+						PERPETUAL META-AGGREGATOR
 					</p>
 				</div>
 
@@ -1180,15 +1102,13 @@ export function AggregatorContainer({ tokenlist }) {
 						<Button bgColor={'#381CB8'} onClick={onToTokenChange(finalSelectedFromToken)}>
 							Calculate
 						</Button>
-
-						<Connect></Connect>
-						{/* <SwapWrapper>
-							{!ethereumAccount ? (
-								<Button bgColor={'#2D00FF'} onClick={connectMetamaskWallet} marginBottom={'20px'}>
+						<SwapWrapper>
+							{!isConnected ? (
+								<Button bgColor={'#2D00FF'} onClick={openConnectModal} marginBottom={'20px'}>
 									Connect Wallet
 								</Button>
 							) : !isValidSelectedChain ? (
-								<Button bgColor={'#2D00FF'} onClick={() => switchNetwork?.(selectedChain.id)}>
+								<Button bgColor={'#2D00FF'} onClick={() => switchNetwork(selectedChain.id)}>
 									Switch Network
 								</Button>
 							) : insufficientBalance ? (
@@ -1290,10 +1210,10 @@ export function AggregatorContainer({ tokenlist }) {
 									)}
 								</>
 							)}
-						</SwapWrapper> */}
+						</SwapWrapper>
 					</Body>
 
-					<Routes ref={routesRef}>
+					<Routes outes ref={routesRef}>
 						{normalizedRoutes?.length ? (
 							<Flex alignItems="center" justifyContent="space-between">
 								<p style={{ color: '#121212', fontWeight: 'bold', fontSize: '20px' }}>
@@ -1319,7 +1239,7 @@ export function AggregatorContainer({ tokenlist }) {
 						  finalSelectedFromToken &&
 						  finalSelectedToToken &&
 						  routes &&
-						  routes.length && !isCalculate ? (
+						  routes.length ? (
 							<FormHeader>No available routes found</FormHeader>
 						) : null}
 						<span style={{ fontSize: '12px', color: '#999999', marginLeft: '4px', marginTop: '4px', display: 'flex' }}>
@@ -1332,7 +1252,7 @@ export function AggregatorContainer({ tokenlist }) {
 							<RoutesPreview />
 						) : null}
 
-						{!isCalculate && normalizedRoutes.map((r, i) => (
+						{normalizedRoutes.map((r, i) => (
 							<Fragment
 								key={
 									selectedChain.label +
@@ -1343,12 +1263,9 @@ export function AggregatorContainer({ tokenlist }) {
 									r?.name
 								}
 							>
-								
 								<SwapRoute
 									{...r}
 									index={i}
-									currentPrice={price}
-									symbol={selectedToken?.symbol}
 									selected={aggregator === r.name}
 									setRoute={() => setAggregator(r.name)}
 									toToken={finalSelectedToToken}
@@ -1361,12 +1278,12 @@ export function AggregatorContainer({ tokenlist }) {
 
 								{aggregator === r.name && (
 									<SwapUnderRoute>
-										{!ethereumAccount ? (
+										{!isConnected ? (
 											<ConnectButtonWrapper>
 												<ConnectButton />
 											</ConnectButtonWrapper>
 										) : !isValidSelectedChain ? (
-											<Button colorScheme={'messenger'} onClick={() => switchNetwork?.(selectedChain.id)}>
+											<Button colorScheme={'messenger'} onClick={() => switchNetwork(selectedChain.id)}>
 												Switch Network
 											</Button>
 										) : (
@@ -1473,7 +1390,7 @@ export function AggregatorContainer({ tokenlist }) {
 									symbol={selectedToken?.symbol}
 									selected={false}
 									type="gains.trade"
-									onCalClick={onCalClick}
+									setRoute={() => setAggregator(null)}
 									toToken={finalSelectedToToken}
 									amountFrom={amountWithDecimals}
 									fromToken={finalSelectedFromToken}
@@ -1487,7 +1404,7 @@ export function AggregatorContainer({ tokenlist }) {
 									currentPrice={gmxPrice}
 									symbol={selectedToken?.symbol}
 									selected={false}
-									onCalClick={onCalClick}
+									setRoute={() => setAggregator(null)}
 									type="GMX"
 									toToken={finalSelectedToToken}
 									amountFrom={amountWithDecimals}
