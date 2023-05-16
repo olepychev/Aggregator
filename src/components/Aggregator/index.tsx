@@ -1172,9 +1172,9 @@ export function AggregatorContainer({ tokenlist }) {
 							Calculate
 						</Button>
 
-						{/* <SwapWrapper>
+						<SwapWrapper>
 							{!ethereumAccount ? (
-								<Button bgColor={'#2D00FF'} onClick={connectMetamaskWallet} marginBottom={'20px'}>
+								<Button bgColor={'#2D00FF'} onClick={openConnectModal} marginBottom={'20px'}>
 									Connect Wallet
 								</Button>
 							) : !isValidSelectedChain ? (
@@ -1280,7 +1280,7 @@ export function AggregatorContainer({ tokenlist }) {
 									)}
 								</>
 							)}
-						</SwapWrapper> */}
+						</SwapWrapper>
 					</Body>
 
 					<Routes ref={routesRef}>
