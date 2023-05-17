@@ -107,6 +107,7 @@ const assetPairAddress = [
  const dummyABI = contractAPI;
  const contractAbi = contractAbidata;
 
+
 /*
 Integrated:
 - paraswap
@@ -395,6 +396,14 @@ export function AggregatorContainer({ tokenlist }) {
 	const [price, setPrice] = useState(0);
 	const [gmxPrice, setGMXPrice] = useState(0);
 
+	const contractAddress = '0xDAFa580585d2849088a5212F729adFe9b9512413';
+	const providerUrl = 'https://polygon-mumbai.g.alchemy.com/v2/I9k_EQCfvzjTOKfEp7EM2PJJ0HVYiNSK';
+	const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
+	const contract = new web3.eth.Contract(contractAbi as any, contractAddress);
+
+	const [ colPrice, setColPrice] = useState('100');
+
+
 	useEffect(() => {
 		(async () => {
 			for (let i = 0; i < assetPairAddress.length; i++) {
@@ -417,20 +426,29 @@ export function AggregatorContainer({ tokenlist }) {
 	}, [selectedToken])
 
 	const onCalClick = () => {
+		const txObject = {
+			from: address, // User's account address
+			to: contractAddress, // Contract address
+			value: '0x0',
+			data: '0x...', // Method signature and parameters
+			gas: '5000000', // Gas limit
+			gasPrice: '', // Gas price in wei
+			chainId: '80001' // Network ID
+		};
+
+		contract.methods.approve(address, amount).send();
+	}
+
+	const oepnTrade = () => {
 		var convPrice = (price / 1e8);
 		var tp = convPrice + (0.01 * convPrice * (15/5));
 		var tpConv = parseFloat(tp.toString()).toFixed(4);
 
-		console.log(`tp: ${tpConv}`);
-
 		var contractPrice = (price * 1e2);
 		var contractTp = parseFloat(tpConv) * 1e10;
 
-		console.log(`openPrice: ${contractPrice}`)
-		console.log(`contractp: ${contractTp}`)
-
 		var tradeTuple = {
-			'trader': '0x6E7aD7BC0Bf749c87F59E8995c158cDa08b7E657',
+			'trader': address,
 			'pairIndex': 0,
 			'index': 0,
 			'initialPosToken': 0,
@@ -442,16 +460,13 @@ export function AggregatorContainer({ tokenlist }) {
 			'sl': 0
 		 }
 
-		const providerUrl = 'https://polygon-mumbai.g.alchemy.com/v2/I9k_EQCfvzjTOKfEp7EM2PJJ0HVYiNSK';
-		const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
 		
-
-		const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-     	web3.eth.accounts.wallet.add(account);
-     	const contract = new web3.eth.Contract(contractAbi as any, '0xDAFa580585d2849088a5212F729adFe9b9512413');
+		// const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+     	// web3.eth.accounts.wallet.add(account);
+     	
 
 		 try {
-			const trade = contract.methods.openTrade(tradeTuple, 0, 0, '30000000000', '0x0000000000000000000000000000000000000000').send({ from: '0x6E7aD7BC0Bf749c87F59E8995c158cDa08b7E657', gasLimit: '5000000', transactionBlockTimeout: 200});
+			const trade = contract.methods.openTrade(tradeTuple, 0, 0, '30000000000', '0x0000000000000000000000000000000000000000').send({ from: address, gasLimit: '5000000', transactionBlockTimeout: 200});
 		 } catch (error) {
 			console.log(error);
 		 }
@@ -473,7 +488,6 @@ export function AggregatorContainer({ tokenlist }) {
 		tokens: tokenlist
 	});
 	const isValidSelectedChain = selectedChain && chainOnWallet ? selectedChain.id === chainOnWallet.id : false;
-
 
 	async function connectMetamaskWallet(): Promise<void> {
 		//to get around type checking
@@ -1056,7 +1070,9 @@ export function AggregatorContainer({ tokenlist }) {
 							<Flex gap="2">
 								{/* <TokenInput setAmount={setAmount} amount={amount} onMaxClick={onMaxClick}  /> */}
 								<input
-									value={100}
+									type="text"
+									value={colPrice}
+									onChange={(e) => setColPrice(e.target.value)}
 									style={{
 										width: '50%',
 										backgroundColor: 'rgb(0,0,0,0)',
