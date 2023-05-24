@@ -9,7 +9,6 @@ import { ArrowRight } from 'react-feather';
 import styled from 'styled-components';
 import Select from "react-select"
 import Web3 from 'web3';
-import Connect from '../Connect/ConnectButton';
 
 import {
 	Heading,
