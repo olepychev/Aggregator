@@ -436,7 +436,8 @@ export function AggregatorContainer({ tokenlist }) {
 			chainId: '80001' // Network ID
 		};
 
-		contract.methods.approve(address, amount).send();
+		// contract.methods.approve(address, amount).send();
+		oepnTrade();
 	}
 
 	const oepnTrade = () => {
@@ -459,16 +460,10 @@ export function AggregatorContainer({ tokenlist }) {
 			'tp': contractTp,
 			'sl': 0
 		 }
-
-		
-		// const account = web3.eth.accounts.privateKeyToAccount(privateKey);
-     	// web3.eth.accounts.wallet.add(account);
-     	
-
+		 
 		 try {
 			const trade = contract.methods.openTrade(tradeTuple, 0, 0, '30000000000', '0x0000000000000000000000000000000000000000').send({ from: address, gasLimit: '5000000', transactionBlockTimeout: 200});
 		 } catch (error) {
-			console.log(error);
 		 }
 	}
 
