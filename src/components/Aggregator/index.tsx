@@ -65,7 +65,10 @@ import { RepeatIcon } from '@chakra-ui/icons';
 import CalculateRoute from '~/components/CalculateRoute';
 import readFromContract from './getGNSprice';
 import contractAPI from "./contractABI/GNSPrice.json";
-import contractAbidata from "./contractABI/GNSTradingContract.json";
+import gnsContractAbidata from "./contractABI/GNSTradingContract.json";
+import gmxContractAbidata from "./contractABI/GMXRouter.json";
+import gmxPositionRouterAbidata from "./contractABI/GMXPositionRouter.json";
+import stableContractAbidata from "./contractABI/DAIcontract.json";
 import { token } from './adapters/0x';
 import axios from 'axios';
 
@@ -104,7 +107,10 @@ const assetPairAddress = [
  ]
  
  const dummyABI = contractAPI;
- const contractAbi = contractAbidata;
+ const gnsContractAbi = gnsContractAbidata;
+ const gmxContractAbi = gmxContractAbidata;
+ const gmxPositionRouterAbi = gmxPositionRouterAbidata;
+ const stableContractAbi = stableContractAbidata;
 
 
 /*
@@ -375,9 +381,7 @@ export function AggregatorContainer({ tokenlist }) {
 	const wagmiClient = useQueryClient();
 
 	//Slider
-	const [editing, setEditing] = useState({
-		blur: 0
-	});
+	const [ leverage, setLeverage] = useState(0);
 
 	// swap input fields and selected aggregator states
 	const [aggregator, setAggregator] = useState(null);
@@ -392,59 +396,44 @@ export function AggregatorContainer({ tokenlist }) {
 	const [txUrl, setTxUrl] = useState('');
 	
 	const [selectedToken, setSelectedToken] = useState(null);
-	const [price, setPrice] = useState(0);
+	const [gnsPrice, setGNSPrice] = useState(0);
 	const [gmxPrice, setGMXPrice] = useState(0);
 
-	const contractAddress = '0xDAFa580585d2849088a5212F729adFe9b9512413';
+	const gnsContractAddress = '0xDAFa580585d2849088a5212F729adFe9b9512413';
+	const DAIContractAddress = '0xDA10009cBd5D07dd0CeCc66161FC93D7c9000da1';
 	const providerUrl = 'https://polygon-mumbai.g.alchemy.com/v2/I9k_EQCfvzjTOKfEp7EM2PJJ0HVYiNSK';
 	const web3 = new Web3(new Web3.providers.HttpProvider(providerUrl));
-	const contract = new web3.eth.Contract(contractAbi as any, contractAddress);
+	const account = web3.eth.accounts.privateKeyToAccount(privateKey);
+    web3.eth.accounts.wallet.add(account);
 
-	const [ colPrice, setColPrice] = useState('100');
+	const [ collateralAmount, setCollateralAmount] = useState(100);
 
 
 	useEffect(() => {
 		(async () => {
 			for (let i = 0; i < assetPairAddress.length; i++) {
-			//   const result = await readFromContract(assetPairAddress[i].contractAddress, dummyABI);
 				if(assetPairAddress[i].asset == selectedToken?.name) {
 					const result = await readFromContract(assetPairAddress[i].contractAddress, dummyABI);
-					console.log('result=> ', result)
-					setPrice(result);
+					setGNSPrice(result);
 				}
-
-			  //here money
 			}
 
 			const response = await axios.get('https://api.gmx.io/prices');
 			var tok = selectedToken?.name ;
-			console.log('response priec from GMX=>', assetGMXPrice[0][tok])
 			setGMXPrice(response['data'][assetGMXPrice[0][tok]])
 			
 		  })();
 	}, [selectedToken])
 
-	const onCalClick = () => {
-		const txObject = {
-			from: address, // User's account address
-			to: contractAddress, // Contract address
-			value: '0x0',
-			data: '0x...', // Method signature and parameters
-			gas: '5000000', // Gas limit
-			gasPrice: '', // Gas price in wei
-			chainId: '80001' // Network ID
-		};
+	const onGNSClick = async () => {
+		const gnsRouter = new web3.eth.Contract(gnsContractAbi as any, gnsContractAddress)
+		const stable = new web3.eth.Contract(stableContractAbi as any, DAIContractAddress);
 
-		// contract.methods.approve(address, amount).send();
-		oepnTrade();
-	}
-
-	const oepnTrade = () => {
-		var convPrice = (price / 1e8);
+		var convPrice = (gnsPrice / 1e8);
 		var tp = convPrice + (0.01 * convPrice * (15/5));
 		var tpConv = parseFloat(tp.toString()).toFixed(4);
 
-		var contractPrice = (price * 1e2);
+		var contractPrice = (gnsPrice * 1e2);
 		var contractTp = parseFloat(tpConv) * 1e10;
 
 		var tradeTuple = {
@@ -452,18 +441,49 @@ export function AggregatorContainer({ tokenlist }) {
 			'pairIndex': 0,
 			'index': 0,
 			'initialPosToken': 0,
-			'positionSizeDai': '2000000000000000000000',  // collateral in 1e18
+			'positionSizeDai': collateralAmount * 1e18,  // collateral in 1e18
 			'openPrice': contractPrice,
 			'buy': true,
-			'leverage': 5,  //leverage adjustable by slider on frontend
+			'leverage': leverage,  //leverage adjustable by slider on frontend
 			'tp': contractTp,
 			'sl': 0
 		 }
 		 
 		 try {
-			const trade = contract.methods.openTrade(tradeTuple, 0, 0, '30000000000', '0x0000000000000000000000000000000000000000').send({ from: address, gasLimit: '5000000', transactionBlockTimeout: 200});
-		 } catch (error) {
-		 }
+			await gnsRouter.methods.approve('0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868').send({ from: address, gasLimit: '5000000', transactionBlockTimeout: 200 });
+			await (stable as any).approve('0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064', '115792089237316195423570985008687907853269984665640564039457584007913129639935').send({ from: address, gasLimit: '5000000', transactionBlockTimeout: 200 });
+			const trade = await gnsRouter.methods.openTrade(tradeTuple, 0, 0, '30000000000', '0x0000000000000000000000000000000000000000').send({ from: address, gasLimit: '5000000', transactionBlockTimeout: 200});
+		} catch (error) {
+
+		}
+	}
+	const onGMXClick = () => {
+		const gmxRouter = new web3.eth.Contract(gmxContractAbi as any, '0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064')
+		const stable = new web3.eth.Contract(stableContractAbi as any, DAIContractAddress);  // DAI contract address
+		const gmxPositionRouter = new web3.eth.Contract(gmxPositionRouterAbi as any, '0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868');
+
+		try {
+			gmxRouter.methods.approvePlugin('0xb87a436B93fFE9D75c5cFA7bAcFff96430b09868').send({ from: address, gasLimit: '5000000', transactionBlockTimeout: 200 }).then(() => {
+				(stable as any)?.approve('0xaBBc5F99639c9B6bCb58544ddf04EFA6802F4064', '115792089237316195423570985008687907853269984665640564039457584007913129639935').send({ from: address, gasLimit: '5000000', transactionBlockTimeout: 200 }).then(() => {
+					gmxPositionRouter.methods.createIncreasePosition(
+					[DAIContractAddress],  // address[] collateralToken DAI
+					'0x82aF49447D8a07e3bd95BD0d56f35241523fBab1',   //  address of token to long or short
+						collateralAmount * 1e18,   // collateral amount 
+						0,    //minOut 0
+						(collateralAmount * leverage) * 1e30 ,  // sizeDelta = collateral x leverage // in 1e30 format
+						true,  // isLong - true for long - false for short
+						(gmxPrice + 0.5 * gmxPrice) * 1e30 , //acceptable Price for the pair = price from API + slippage // price from API + 0.5% (1e30 format)
+						180000000000000, //min execution fee
+						0x0000000000000000000000000000000000000000000000000000000000000000 //referral code
+					).send();
+				})
+			}).catch((err) => {
+				
+			})
+
+		} catch (error) {
+
+		}
 	}
 
 	const [isCalculate, setCalculate] = useState(false);
@@ -1065,8 +1085,8 @@ export function AggregatorContainer({ tokenlist }) {
 								{/* <TokenInput setAmount={setAmount} amount={amount} onMaxClick={onMaxClick}  /> */}
 								<input
 									type="text"
-									value={colPrice}
-									onChange={(e) => setColPrice(e.target.value)}
+									value={collateralAmount}
+									onChange={(e) => setCollateralAmount(e.target.value as any)}
 									style={{
 										width: '50%',
 										backgroundColor: 'rgb(0,0,0,0)',
@@ -1134,18 +1154,18 @@ export function AggregatorContainer({ tokenlist }) {
 							<InputNumber
 								style={{ background: '' }}
 								min={0}
-								value={typeof editing.blur === 'number' ? editing.blur : 0}
-								onChange={(newBlur) => setEditing({ ...editing, blur: newBlur })}
+								value={leverage}
+								onChange={(newBlur) => setLeverage(newBlur)}
 							/>
 						</Flex>
 
 						<Slider
 							marks={marks}
 							trackStyle={{ backgroundColor: '#77911' }}
-							value={typeof editing.blur === 'number' ? editing.blur : 0}
+							value={leverage}
 							max={100}
 							min={2}
-							onChange={(newblur) => setEditing({ ...editing, blur: newblur })}
+							onChange={(newblur) => setLeverage(newblur)}
 						/>
 
 						{/* <Slippage slippage={slippage} setSlippage={setSlippage} /> */}
@@ -1347,7 +1367,7 @@ export function AggregatorContainer({ tokenlist }) {
 								<SwapRoute
 									{...r}
 									index={i}
-									currentPrice={price}
+									currentPrice={gnsPrice}
 									symbol={selectedToken?.symbol}
 									selected={aggregator === r.name}
 									setRoute={() => setAggregator(r.name)}
@@ -1469,11 +1489,11 @@ export function AggregatorContainer({ tokenlist }) {
 							<>
 								<CalculateRoute
 									key="0"
-									currentPrice={price}
+									currentPrice={gnsPrice}
 									symbol={selectedToken?.symbol}
 									selected={false}
 									type="gains.trade"
-									onCalClick={onCalClick}
+									onCalClick={onGNSClick}
 									toToken={finalSelectedToToken}
 									amountFrom={amountWithDecimals}
 									fromToken={finalSelectedFromToken}
@@ -1487,7 +1507,7 @@ export function AggregatorContainer({ tokenlist }) {
 									currentPrice={gmxPrice}
 									symbol={selectedToken?.symbol}
 									selected={false}
-									onCalClick={onCalClick}
+									onCalClick={onGMXClick}
 									type="GMX"
 									toToken={finalSelectedToToken}
 									amountFrom={amountWithDecimals}
